@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FishDB — Base de données aquariophile AQUADOM Martinique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0D2B55;
+  --teal:    #1A7A8A;
+  --teal-l:  #E1F5EE;
+  --teal-m:  #B2DFE8;
+  --sand:    #F7F3EC;
+  --sand-d:  #EDE7DA;
+  --white:   #FFFFFF;
+  --ink:     #12222F;
+  --ink-m:   #3D5166;
+  --ink-l:   #7A90A4;
+  --border:  #D6E4EC;
+  --green:   #1E8449;
+  --green-l: #EAF3DE;
+  --amber:   #B7770D;
+  --amber-l: #FEF3CD;
+  --red:     #C0392B;
+  --red-l:   #FCEBEB;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+
+  --shadow-sm: 0 1px 4px rgba(13,43,85,.06), 0 2px 8px rgba(13,43,85,.04);
+  --shadow-md: 0 4px 16px rgba(13,43,85,.10), 0 1px 4px rgba(13,43,85,.06);
+  --shadow-lg: 0 12px 40px rgba(13,43,85,.14), 0 4px 12px rgba(13,43,85,.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--sand);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* ── HEADER ───────────────────────────────────────────────────────────── */
+header {
+  background: var(--navy);
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 3px solid var(--teal);
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 20px;
+  height: 62px;
+}
+.logo {
+  display: flex; align-items: baseline; gap: 10px;
+  text-decoration: none; flex-shrink: 0;
+}
+.logo-fish {
+  font-size: 22px; line-height: 1;
+  display: inline-flex; align-items: center;
+}
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 700;
+  color: var(--white); letter-spacing: .02em;
+}
+.logo-sub {
+  font-size: 11px; font-weight: 400;
+  color: var(--teal-m); letter-spacing: .06em;
+  text-transform: uppercase; align-self: center;
+}
+.header-search {
+  flex: 1; max-width: 400px;
+  position: relative;
+}
+.header-search input {
+  width: 100%;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: var(--r-lg);
+  padding: 8px 16px 8px 38px;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: background .2s, border-color .2s;
+}
+.header-search input::placeholder { color: rgba(255,255,255,.45); }
+.header-search input:focus {
+  background: rgba(255,255,255,.16);
+  border-color: var(--teal);
+}
+.search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: rgba(255,255,255,.45); font-size: 15px; pointer-events: none;
+}
+.header-actions {
+  display: flex; align-items: center; gap: 10px; margin-left: auto;
+}
+.btn-outline {
+  border: 1px solid rgba(255,255,255,.25);
+  background: transparent;
+  color: rgba(255,255,255,.85);
+  border-radius: var(--r-md);
+  padding: 7px 14px;
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-outline:hover {
+  background: rgba(255,255,255,.1);
+  border-color: rgba(255,255,255,.5);
+  color: var(--white);
+}
+.stat-badge {
+  background: rgba(26,122,138,.35);
+  border: 1px solid rgba(26,122,138,.5);
+  color: var(--teal-m);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px; font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── LAYOUT ───────────────────────────────────────────────────────────── */
+.app {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 24px 60px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  padding-top: 28px;
+}
+
+/* ── SIDEBAR ──────────────────────────────────────────────────────────── */
+.sidebar { position: sticky; top: 90px; align-self: start; }
+
+.filter-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+.filter-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 600;
+  color: var(--ink-m);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.filter-group { margin-bottom: 18px; }
+.filter-group:last-child { margin-bottom: 0; }
+.filter-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--ink-l);
+  text-transform: uppercase; letter-spacing: .07em;
+  margin-bottom: 8px;
+  display: block;
+}
+.filter-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.chip {
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--sand);
+  color: var(--ink-m);
+  transition: all .15s;
+  user-select: none;
+}
+.chip:hover { border-color: var(--teal); color: var(--teal); }
+.chip.active {
+  background: var(--teal); border-color: var(--teal);
+  color: var(--white);
+}
+.chip-all { background: var(--navy); border-color: var(--navy); color: var(--white); }
+
+select.filter-select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--white);
+  cursor: pointer;
+  outline: none;
+}
+select.filter-select:focus { border-color: var(--teal); }
+
+.results-count {
+  font-size: 12px; color: var(--ink-l);
+  text-align: center; padding-top: 10px;
+}
+
+/* ── MAIN GRID ────────────────────────────────────────────────────────── */
+.main {}
+
+.section-header {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  color: var(--navy);
+}
+.section-sub {
+  font-size: 13px; color: var(--ink-l);
+}
+
+.fish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ── FISH CARD ────────────────────────────────────────────────────────── */
+.fish-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px 18px 16px;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+  position: relative;
+  overflow: hidden;
+}
+.fish-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--navy));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .25s;
+}
+.fish-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--teal-m);
+}
+.fish-card:hover::before { transform: scaleX(1); }
+
+.card-emoji { font-size: 36px; margin-bottom: 10px; display: block; line-height: 1; }
+.card-name {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 600;
+  color: var(--navy); margin-bottom: 2px;
+  line-height: 1.3;
+}
+.card-latin {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--ink-l);
+  font-style: italic; margin-bottom: 12px;
+  line-height: 1.4;
+}
+.card-tags {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  margin-bottom: 10px;
+}
+.tag {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px;
+  letter-spacing: .03em;
+}
+.tag-diff-debutant    { background: #EAF3DE; color: #27500A; }
+.tag-diff-intermediaire { background: #FEF3CD; color: #7A4F00; }
+.tag-diff-avance      { background: #FAECE7; color: #7A2E1A; }
+.tag-diff-expert      { background: #FCEBEB; color: #791F1F; }
+.tag-eau { background: var(--teal-l); color: #085041; }
+.tag-vol { background: var(--sand-d); color: var(--ink-m); }
+
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--ink-l);
+}
+.card-arrow {
+  color: var(--teal); font-size: 14px;
+  transition: transform .15s;
+}
+.fish-card:hover .card-arrow { transform: translateX(3px); }
+
+/* ── EMPTY STATE ─────────────────────────────────────────────────────── */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center; padding: 60px 20px;
+  color: var(--ink-l);
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+.empty-state h3 { font-family: var(--font-display); font-size: 20px; color: var(--ink-m); margin-bottom: 8px; }
+
+/* ── DETAIL VIEW ─────────────────────────────────────────────────────── */
+.detail-view {
+  display: none;
+  grid-column: 1 / -1;
+}
+.detail-view.open { display: block; }
+
+.detail-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--teal);
+  cursor: pointer; margin-bottom: 24px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--white);
+  transition: all .15s;
+}
+.detail-back:hover { background: var(--teal-l); border-color: var(--teal); }
+
+.detail-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.detail-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1A4A70 100%);
+  padding: 36px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.detail-hero::after {
+  content: '';
+  position: absolute; right: -20px; bottom: -30px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(26,122,138,.18);
+  pointer-events: none;
+}
+.detail-hero-inner {
+  display: flex; align-items: flex-start; gap: 24px;
+  position: relative; z-index: 1;
+}
+.detail-emoji-big {
+  font-size: 70px; line-height: 1;
+  flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(0,0,0,.3));
+}
+.detail-hero-text { flex: 1; }
+.detail-name {
+  font-family: var(--font-display);
+  font-size: 32px; font-weight: 700;
+  color: var(--white); line-height: 1.2; margin-bottom: 4px;
+}
+.detail-latin {
+  font-family: var(--font-mono);
+  font-size: 14px; color: var(--teal-m);
+  font-style: italic; margin-bottom: 14px;
+}
+.detail-badges {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.badge {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .02em;
+}
+.badge-diff { }
+.badge-debutant    { background: rgba(234,243,222,.2); color: #9FD472; border: 1px solid rgba(159,212,114,.3); }
+.badge-intermediaire { background: rgba(254,243,205,.15); color: #FACD6A; border: 1px solid rgba(250,205,106,.3); }
+.badge-avance      { background: rgba(250,236,231,.15); color: #F0A07A; border: 1px solid rgba(240,160,122,.3); }
+.badge-expert      { background: rgba(252,235,235,.15); color: #F08080; border: 1px solid rgba(240,128,128,.3); }
+.badge-eau  { background: rgba(26,122,138,.25); color: var(--teal-m); border: 1px solid rgba(26,122,138,.4); }
+.badge-famille { background: rgba(255,255,255,.1); color: rgba(255,255,255,.75); border: 1px solid rgba(255,255,255,.2); }
+.badge-legal-warn { background: rgba(192,57,43,.25); color: #F08080; border: 1px solid rgba(192,57,43,.4); }
+.badge-legal-ok   { background: rgba(30,132,73,.25); color: #6FCF97; border: 1px solid rgba(30,132,73,.4); }
+
+/* detail tabs */
+.detail-tabs {
+  display: flex; gap: 0;
+  border-bottom: 2px solid var(--border);
+  overflow-x: auto;
+  padding: 0 24px;
+}
+.dtab {
+  padding: 14px 20px;
+  font-size: 13px; font-weight: 500;
+  color: var(--ink-l);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.dtab:hover { color: var(--ink); }
+.dtab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+.dtab-icon { font-size: 15px; }
+
+/* detail content */
+.detail-body { padding: 28px 32px; }
+.dpane { display: none; }
+.dpane.active { display: block; }
+
+/* param grid */
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 12px; margin-bottom: 24px;
+}
+.param-box {
+  background: var(--sand);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.param-box-label {
+  font-size: 10px; font-weight: 600;
+  color: var(--ink-l); text-transform: uppercase;
+  letter-spacing: .07em; margin-bottom: 4px;
+}
+.param-box-value {
+  font-family: var(--font-mono);
+  font-size: 15px; font-weight: 500;
+  color: var(--navy);
+}
+.param-box-ideal {
+  font-size: 10px; color: var(--teal);
+  margin-top: 2px;
+}
+
+/* section blocks */
+.dsection { margin-bottom: 28px; }
+.dsection-title {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.dsection-icon { font-size: 16px; }
+
+.dtext {
+  font-size: 14px; line-height: 1.75;
+  color: var(--ink-m);
+}
+
+/* compat grid */
+.compat-cols {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.compat-col-title {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.compat-col-ok .compat-col-title { color: var(--green); }
+.compat-col-ko .compat-col-title { color: var(--red); }
+.compat-item {
+  font-size: 13px; padding: 8px 12px;
+  border-radius: var(--r-sm);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.compat-item-ok { background: var(--green-l); color: #1A6B38; }
+.compat-item-ok::before { content: '✓ '; font-weight: 700; }
+.compat-item-ko { background: var(--red-l); color: #8B1A10; }
+.compat-item-ko::before { content: '✗ '; font-weight: 700; }
+
+/* aliments */
+.aliment-list { display: flex; flex-direction: column; gap: 8px; }
+.aliment-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--white);
+}
+.aliment-prio {
+  flex-shrink: 0; width: 80px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 2px 8px; border-radius: 10px;
+  text-align: center;
+}
+.prio-indispensable { background: #EAF3DE; color: #27500A; }
+.prio-recommande    { background: var(--teal-l); color: #085041; }
+.prio-complement    { background: var(--amber-l); color: #7A4F00; }
+.prio-occasionnel   { background: var(--sand-d); color: var(--ink-m); }
+.prio-deconseille   { background: var(--red-l); color: #791F1F; }
+.aliment-info { flex: 1; }
+.aliment-nom { font-size: 13px; font-weight: 500; color: var(--ink); }
+.aliment-note { font-size: 12px; color: var(--ink-l); margin-top: 2px; }
+
+/* repro tableau */
+.repro-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+.repro-table th {
+  background: var(--navy); color: var(--white);
+  padding: 10px 14px; text-align: left;
+  font-weight: 600; font-size: 11px;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.repro-table td {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.repro-table tr:nth-child(even) td { background: var(--sand); }
+.repro-table .col-etape { color: var(--ink-m); font-weight: 500; width: 35%; }
+.repro-table .col-valeur { color: var(--navy); font-weight: 600; }
+.repro-table .col-note { color: var(--ink-l); font-size: 12px; font-style: italic; }
+
+/* santé */
+.maladie-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden; margin-bottom: 10px;
+}
+.maladie-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: var(--sand);
+  cursor: pointer;
+}
+.maladie-nom { font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; }
+.maladie-gravite {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.grav-faible   { background: var(--green-l); color: #27500A; }
+.grav-moderee  { background: var(--amber-l); color: #7A4F00; }
+.grav-elevee   { background: var(--red-l);   color: #791F1F; }
+.grav-mortelle { background: var(--red); color: white; }
+.maladie-body { padding: 12px 14px; display: none; }
+.maladie-body.open { display: block; }
+.maladie-row { margin-bottom: 8px; font-size: 13px; }
+.maladie-row-label { font-weight: 600; color: var(--ink-m); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+
+/* résumé */
+.resume-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.resume-col { border-radius: var(--r-md); padding: 16px; }
+.resume-col-ok { background: var(--green-l); border: 1px solid #C0DDB0; }
+.resume-col-ko { background: var(--red-l);   border: 1px solid #E0B0B0; }
+.resume-col-title {
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  margin-bottom: 10px;
+}
+.resume-col-ok .resume-col-title { color: var(--green); }
+.resume-col-ko .resume-col-title { color: var(--red); }
+.resume-item {
+  font-size: 13px; margin-bottom: 6px;
+  line-height: 1.5; padding-left: 16px;
+  position: relative;
+}
+.resume-item::before {
+  content: '•'; position: absolute; left: 0;
+  font-weight: 700;
+}
+.resume-col-ok .resume-item::before { color: var(--green); }
+.resume-col-ko .resume-item::before { color: var(--red); }
+
+/* warn box */
+.warn-box {
+  border-radius: var(--r-md); padding: 12px 16px;
+  font-size: 13px; line-height: 1.6;
+  margin-top: 12px;
+}
+.warn-box-amber { background: var(--amber-l); border-left: 3px solid var(--amber); color: #5A3800; }
+.warn-box-teal  { background: var(--teal-l);  border-left: 3px solid var(--teal);  color: #063F48; }
+.warn-box-red   { background: var(--red-l);   border-left: 3px solid var(--red);   color: #5A1A14; }
+
+/* localités */
+.localite-list { display: flex; flex-direction: column; gap: 8px; }
+.localite-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: var(--sand);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.localite-pin { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.localite-nom { font-size: 13px; font-weight: 600; color: var(--navy); }
+.localite-coords { font-family: var(--font-mono); font-size: 11px; color: var(--ink-l); }
+.localite-note { font-size: 12px; color: var(--ink-l); margin-top: 2px; }
+
+/* print PDF */
+@media print {
+  header, .sidebar, .detail-back, .detail-tabs { display: none !important; }
+  .app { grid-template-columns: 1fr; padding: 0; }
+  .detail-card { box-shadow: none; border: none; }
+  .dpane { display: block !important; }
+  .detail-body { padding: 16px 0; }
+}
+
+/* ── HERO (liste vide) ─────────────────────────────────────────────────── */
+.hero-banner {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, var(--navy), #1A4A70);
+  border-radius: var(--r-xl);
+  padding: 40px 48px;
+  color: var(--white);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.hero-banner::after {
+  content: '';
+  position: absolute; right: 80px; top: -40px;
+  width: 240px; height: 240px; border-radius: 50%;
+  background: rgba(26,122,138,.2); pointer-events: none;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 700; margin-bottom: 8px;
+}
+.hero-sub { font-size: 14px; color: rgba(255,255,255,.7); max-width: 460px; line-height: 1.6; }
+.hero-stats { display: flex; gap: 28px; margin-top: 20px; }
+.hero-stat-n { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--teal-m); }
+.hero-stat-l { font-size: 12px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .07em; }
+.hero-fish-big { font-size: 80px; position: relative; z-index: 1; flex-shrink: 0; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; padding: 16px; }
+  .sidebar { position: static; }
+  .hero-banner { flex-direction: column; padding: 28px 24px; }
+  .hero-fish-big { display: none; }
+  .detail-hero { padding: 24px 20px; }
+  .detail-body { padding: 20px 16px; }
+  .compat-cols, .resume-cols { grid-template-columns: 1fr; }
+  .detail-name { font-size: 24px; }
+  .detail-hero-inner { flex-direction: column; gap: 14px; }
+}
+
+/* loading */
+.loading { text-align: center; padding: 60px; color: var(--ink-l); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <span class="logo-fish">🐟</span>
+      <span class="logo-text">FishDB</span>
+      <span class="logo-sub">Aquadom · Martinique</span>
+    </a>
+    <div class="header-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="globalSearch" placeholder="Rechercher une espèce…" autocomplete="off">
+    </div>
+    <div class="header-actions">
+      <span class="stat-badge" id="headerCount">— espèces</span>
+      <button class="btn-outline" onclick="window.print()">📄 PDF</button>
+      <a class="btn-outline" href="https://aquadom-martinique.fr" target="_blank">🐠 Aquadom</a>
+    </div>
+  </div>
+</header>
+
+<!-- APP -->
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="filter-card">
+      <div class="filter-title">Filtres</div>
+
+      <div class="filter-group">
+        <span class="filter-label">Difficulté</span>
+        <div class="filter-chips" id="chips-diff">
+          <span class="chip chip-all active" data-diff="">Toutes</span>
+          <span class="chip" data-diff="debutant">Débutant</span>
+          <span class="chip" data-diff="intermediaire">Inter.</span>
+          <span class="chip" data-diff="avance">Avancé</span>
+          <span class="chip" data-diff="expert">Expert</span>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Famille</span>
+        <select class="filter-select" id="filterFamille">
+          <option value="">Toutes les familles</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Mode reproducteur</span>
+        <select class="filter-select" id="filterRepro">
+          <option value="">Tous les modes</option>
+          <option value="incubateur_buccal_paternel">Incubateur buccal paternel</option>
+          <option value="nid_de_bulles">Nid de bulles</option>
+          <option value="pondeur_substrat_ouvert">Pondeur substrat ouvert</option>
+          <option value="pondeur_cavicole">Pondeur cavicole</option>
+          <option value="vivipare">Vivipare</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Trier par</span>
+        <select class="filter-select" id="sortBy">
+          <option value="name">Nom</option>
+          <option value="diff">Difficulté</option>
+          <option value="taille">Taille</option>
+          <option value="volume">Volume minimum</option>
+        </select>
+      </div>
+
+      <div class="results-count" id="resultsCount"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+    <!-- HERO (shown on first load) -->
+    <div class="hero-banner" id="heroBanner">
+      <div>
+        <div class="hero-title">Base de données aquariophile</div>
+        <div class="hero-sub">Fiches espèces expertes pour la fishroom AQUADOM — paramètres, reproduction, génétique, cohabitation et notes Martinique.</div>
+        <div class="hero-stats">
+          <div><div class="hero-stat-n" id="heroCount">1</div><div class="hero-stat-l">Espèce</div></div>
+          <div><div class="hero-stat-n">9</div><div class="hero-stat-l">Sections / fiche</div></div>
+          <div><div class="hero-stat-n">v1</div><div class="hero-stat-l">Version</div></div>
+        </div>
+      </div>
+      <div class="hero-fish-big">🐟</div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title" id="sectionTitle">Espèces</span>
+      <span class="section-sub" id="sectionSub"></span>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div class="fish-grid" id="fishGrid"></div>
+
+    <!-- DETAIL VIEW -->
+    <div class="detail-view" id="detailView">
+      <div class="detail-back" id="backBtn">← Retour à la liste</div>
+      <div class="detail-card" id="detailCard"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA — fiches JSON embarquées
+// ═══════════════════════════════════════════════════════════
+const FICHES = [
+  {
+  "id": 1,
+  "meta": {
+    "statut": "publie", "version": "1.0",
+    "date_creation": "2026-04-05", "date_mise_a_jour": "2026-04-05",
+    "contributeurs": ["Philippe PAIN"], "categorie": "poisson_eau_douce",
+    "note_martinique": true
+  },
+  "identite": {
+    "nom_scientifique_valide": "Betta channoides",
+    "auteur_description": "Kottelat & Ng", "annee_description": 1994,
+    "etymologie": "Channoides = ressemblant aux Channa (poissons-têtes-de-serpent) — en référence à la morphologie aplatie de la tête",
+    "synonymes": [{"nom": "Betta sp. channoides", "type_synonyme": "nom_provisoire", "note": "Nom utilisé avant la description officielle de 1994"}],
+    "famille": "Osphronemidae", "ordre": "Anabantiformes", "genre": "Betta",
+    "complexe_groupe": "Complexe albimarginata — incubateurs buccaux paternels",
+    "noms_communs": {
+      "fr": ["Betta à tête de serpent", "Betta channoides"],
+      "en": ["Snake-head Betta", "Channoides Betta"]
+    },
+    "statut_legal": {
+      "cites": "Non listé", "statut_iucn": "DD",
+      "protection_nationale": "Espèce protégée en Indonésie — vérifier la légalité et l'origine des spécimens",
+      "reglementation_martinique": "Import soumis à vérification douanière",
+      "avertissement": "⚠️ Espèce protégée — vérifier impérativement l'origine et la légalité des spécimens"
+    },
+    "origine": {
+      "pays": ["Indonésie"],
+      "regions": ["Kalimantan Timur", "Bassin de la rivière Mahakam"],
+      "localites_connues": [
+        {"nom": "Mujup / Mujub", "latitude": -0.017, "longitude": 115.717, "note": "Localité type officielle"},
+        {"nom": "Village de Pampang", "note": "Forme la plus prisée — coloration particulièrement intense"},
+        {"nom": "Sungai Merimun", "note": "Localité connue"},
+        {"nom": "Muarapahu", "note": "Localité connue"}
+      ],
+      "localite_type": "Ruisseau sans nom près de Mujub (0°01'S, 115°43'E)"
+    },
+    "habitat_naturel": {
+      "description": "Ruisseaux de forêt à eau noire acide, peu profonds, parmi feuilles mortes et racines. Eau brune tannée, fortement ombragée.",
+      "type_habitat": ["ruisseau_foret", "eau_stagnante"]
+    },
+    "taille_adulte": {"male_max_cm": 5, "femelle_max_cm": 4.5, "note_taille": "Mâle légèrement plus grand"},
+    "duree_vie_ans": {"min": 5, "max": 7, "note": "Longévité remarquable pour un petit Betta"},
+    "niveau_difficulte": "intermediaire",
+    "note_difficulte": "pH-mètre et conductimètre indispensables. Nourriture vivante quasi obligatoire."
+  },
+  "description_physique": {
+    "description_generale": "Poisson compact et trapu. Tête large et aplatie rappelant un bouledogue ou la tête des Channa. Morphologie de tête plus prononcée que chez B. albimarginata.",
+    "coloration_male": "Fond brun chocolat à brun-orangé. Tête rouge vif contrastante. Opercule noire avec reflets iridescents. Dorsale bordée d'un liséré blanc nacré très visible. En parade : brun-orangé profond et chaleureux.",
+    "coloration_femelle": "Plus discrète, fond brun à gris avec marques moins prononcées.",
+    "dimorphisme_sexuel": {
+      "male": "Tête plus large et aplatie (bouledogue), coloration plus intense, nageoires plus développées, comportement territorial.",
+      "femelle": "Tête plus fine, coloris terne (brun-gris), ventre arrondi à maturité.",
+      "criteres_fiables": ["Oviducte (point blanc) visible sur le ventre de la femelle à maturité", "Largeur et aplatissement de la tête"]
+    },
+    "criteres_distinction_especes_proches": [
+      {"espece_comparee": "Betta albimarginata", "critere": "B. channoides est nettement plus trapu avec une tête plus large et plus carrée. B. albimarginata est plus élancé et gracile."}
+    ]
+  },
+  "parametres_eau": {
+    "maintenance": {
+      "temperature_c": {"min": 21, "max": 28, "ideal": 26},
+      "ph": {"min": 4.5, "max": 6.0, "ideal_min": 5.0, "ideal_max": 5.5},
+      "gh_dgh": {"min": 1, "max": 5},
+      "kh_dkh": {"min": 0, "max": 2},
+      "conductivite_us_cm": {"min": 0, "max": 80},
+      "nitrites_mg_l": {"max": 0},
+      "nitrates_mg_l": {"max": 15}
+    },
+    "reproduction": {
+      "temperature_c": {"min": 25, "max": 28, "note": "Légère hausse favorise le déclenchement"},
+      "ph": {"min": 4.5, "max": 5.5, "note": "Eau très acide favorise la réceptivité"},
+      "note_generale": "Conditionner les reproducteurs avec nourriture vivante 2-3 semaines avant l'accouplement."
+    },
+    "preparation_eau": "Eau osmosée à 80-100% + granulés de tourbe + feuilles de chêne / catappa. L'eau tannée brun-ambre est l'environnement naturel.",
+    "avertissements_chimie": [
+      "Surveiller le pH régulièrement — eau sans KH peut dériver vers l'acidose",
+      "Conductimètre vivement conseillé pour contrôler la minéralisation"
+    ],
+    "note_martinique": "L'eau du robinet de Martinique est neutre à légèrement dure — incompatible directement. Osmoseur indispensable. En saison chaude, température peut dépasser 28°C — ventiler."
+  },
+  "aquarium": {
+    "volume_minimum_litres": 20, "volume_ideal_litres": 40, "volume_groupe_litres": 60,
+    "courant": "nul", "eclairage": "tres_faible",
+    "couvercle_obligatoire": true, "labyrinthe_respiratoire": true,
+    "substrat": "Sable fin sombre + litière généreuse de feuilles mortes (chêne, catappa, hêtre).",
+    "vegetation": "Mousses de Java, Anubias sur racines, plantes flottantes (Salvinia). Pas de végétation enracinée en biotope strict.",
+    "decor_cachettes": "ESSENTIELLES : pots en terre cuite, boîtiers de pellicules photo (taille idéale pour le mâle en incubation), tubes PVC, grottes.",
+    "filtration": "Filtre éponge à air uniquement — zéro courant.",
+    "changements_eau": "15-20% hebdomadaire avec eau préparée à même acidité et température.",
+    "biotope_naturel": "Substrat de feuilles mortes, racines, mousses de Java, eau tannée brun-ambre.",
+    "note_martinique": "En saison chaude martiniquaise, température peut dépasser 28°C — prévoir ventilation ou emplacement climatisé."
+  },
+  "comportement": {
+    "comportement_general": "Espèce polygame — un mâle dominant peut s'accoupler avec plusieurs femelles successivement. Avec un layout bien pensé, un groupe peut cohabiter harmonieusement. Quelques chamailleries entre mâles inévitables mais sans gravité. Prédateur des espèces < 1,2 cm.",
+    "temperament": "semi_agressif", "comportement_social": "en_harem",
+    "configuration_recommandee": "1 mâle pour 2-3 femelles (harémiste naturel)",
+    "cohabitation_ok": [
+      {"espece_ou_groupe": "Boraras brigittae, B. merah, B. urophthalmoides", "note": "Même gabarit, eau acide, zones différentes"},
+      {"espece_ou_groupe": "Trigonostigma heteromorpha, T. espei", "note": "Rasboras calmes d'eau acide"},
+      {"espece_ou_groupe": "Nannostomus marginatus", "condition": "Grand bac uniquement"},
+      {"espece_ou_groupe": "Otocinclus", "note": "Discrets et non compétitifs"},
+      {"espece_ou_groupe": "Crevettes Caridina (eau acide)", "condition": "Avec prudence — adultes peuvent prédater les juvéniles"},
+      {"espece_ou_groupe": "Betta albimarginata", "condition": "Grand bac uniquement — même complexe"}
+    ],
+    "cohabitation_ko": [
+      {"espece_ou_groupe": "Espèces < 1,2 cm", "raison": "Proies potentielles"},
+      {"espece_ou_groupe": "Poissons de fond actifs ou compétitifs", "raison": "Perturbent le mâle en incubation"},
+      {"espece_ou_groupe": "Tout Cichlidé", "raison": "Trop agressif ou territorial"},
+      {"espece_ou_groupe": "Espèces d'eau neutre à dure", "raison": "Paramètres d'eau incompatibles"},
+      {"espece_ou_groupe": "Betta splendens et autres Bettas combattants", "raison": "Conflits sévères entre mâles — risque de mort"}
+    ],
+    "comportements_notables": [
+      "Incubation buccale paternelle : le mâle porte les œufs 10-21 jours sans manger — ne jamais perturber",
+      "Remontées régulières en surface pour respirer via le labyrinthe — comportement normal et indispensable",
+      "Le mâle en incubation se réfugie dans la cachette la plus étroite disponible"
+    ]
+  },
+  "alimentation": {
+    "regime": "insectivore",
+    "description_regime": "Microprédateur insectivore. Chasse petits insectes, arthropodes et zooplancton de surface. Tolère difficilement la nourriture sèche.",
+    "aliments": [
+      {"nom": "Daphnies vivantes", "priorite": "indispensable", "type_aliment": "vivant", "note": "Base idéale de l'alimentation"},
+      {"nom": "Artémias adultes vivantes", "priorite": "indispensable", "type_aliment": "vivant", "note": "Avec modération — voir avertissements"},
+      {"nom": "Micro-vers (Grindal worms, microworms)", "priorite": "indispensable", "type_aliment": "vivant"},
+      {"nom": "Drosophiles aptères", "priorite": "recommande", "type_aliment": "vivant", "note": "Stimulent fortement l'instinct de chasseur"},
+      {"nom": "Daphnies congelées", "priorite": "recommande", "type_aliment": "congele", "note": "Priorité parmi les aliments congelés"},
+      {"nom": "Artémias congelées", "priorite": "recommande", "type_aliment": "congele"},
+      {"nom": "Cyclops congelés", "priorite": "recommande", "type_aliment": "congele"},
+      {"nom": "Larves de moustiques vivantes ou congelées", "priorite": "recommande", "type_aliment": "vivant"},
+      {"nom": "Granulés spéciaux Betta haute qualité", "priorite": "complement", "type_aliment": "granules", "note": "Tolérés après acclimatation uniquement — jamais aliment exclusif"}
+    ],
+    "frequence": "1-2 fois par jour, petites quantités. Jeûner 1-2 jours par semaine.",
+    "avertissements": [
+      "Excès d'artémias documenté comme cause de problèmes de santé — varier impérativement",
+      "Ne jamais utiliser granulés ou paillettes comme seule alimentation"
+    ],
+    "note_male_couvaison": "Le mâle en incubation ne mange pas pendant 10 à 21 jours — comportement normal, ne pas forcer. Conditionner généreusement avant l'accouplement."
+  },
+  "reproduction": {
+    "mode_reproducteur": "incubateur_buccal_paternel",
+    "description_generale": "Le mâle incube les œufs dans sa bouche pendant 10 à 21 jours, sans se nourrir. Les alevins sortent directement formés et nageurs — pas de stade larvaire vulnérable. Mode reproducteur parmi les plus fascinants de l'aquariophilie.",
+    "declenchement": {
+      "description": "Espèce polygame. Bonne condition physique des deux partenaires indispensable.",
+      "parametres_eau_specifiques": "pH 5.0-5.5, GH 1-3, température 25-27°C",
+      "autres_facteurs": ["Conditionnement avec nourriture vivante abondante (2-3 semaines)", "Cachettes suffisantes", "Calme absolu autour du bac"]
+    },
+    "deroulement": "Parade nuptiale intense : érection de toutes les nageoires, coloration orange-brun intense du mâle. Amplexus : le mâle enroule son corps autour de la femelle. Les œufs sont immédiatement recueillis par le mâle dans sa bouche. Il se retire dans la cachette la plus protégée.",
+    "tableau_etapes": [
+      {"etape": "Nombre d'œufs / portée", "valeur": "10 à 30 œufs", "note": "10 est un bon résultat pour un mâle inexpérimenté"},
+      {"etape": "Mode d'incubation", "valeur": "Buccale paternelle", "note": "Le mâle porte les œufs dans sa bouche"},
+      {"etape": "Durée d'incubation", "valeur": "10 à 21 jours", "note": "Le mâle ne se nourrit pas pendant toute cette période"},
+      {"etape": "Alevins à la libération", "valeur": "Directement formés et nageurs", "note": "Taille ≈ 7-10 mm — autonomes immédiatement"},
+      {"etape": "Première nourriture", "valeur": "Micro-vers et nauplies d'artémias", "note": "Bouche suffisamment grande dès la libération"},
+      {"etape": "Artémias alevins", "valeur": "Quantités modérées uniquement", "note": "Problèmes de santé documentés en excès"},
+      {"etape": "Changements d'eau alevins", "valeur": "Petits et réguliers (10%)", "note": "Préférables aux grands changements intermittents"},
+      {"etape": "Maturité sexuelle", "valeur": "8 à 12 mois"}
+    ],
+    "elevage_alevins": "Les alevins sont autonomes dès la libération. Micro-vers et nauplies d'artémias acceptés immédiatement. Petits changements d'eau réguliers (10%). L'eau de tourbe et les feuilles fournissent naturellement des oligo-éléments.",
+    "points_critiques": [
+      "Un mâle couvant stressé peut avaler ou relâcher prématurément les œufs — minimiser toute perturbation",
+      "Si isolé pour l'incubation : bac parfaitement stable, peu éclairé, silencieux",
+      "Ne jamais forcer le mâle à manger pendant l'incubation",
+      "Maintenir les lignées de localités différentes strictement séparées"
+    ],
+    "difficulte_reproduction": "intermediaire"
+  },
+  "genetique": {
+    "description_generale": "Espèce peu domestiquée — pas de morphs selectively bred établis. La diversité génétique réside dans les populations locales (localités). Les éleveurs spécialisés maintiennent les populations séparées par localité pour préserver les lignées pures.",
+    "morphs_selectionnes": [],
+    "lignees_localites": [
+      {"localite": "Mujup / Mujub", "caracteristiques": "Localité type — population de référence", "statut_conservation": "population_captive_active"},
+      {"localite": "Pampang", "caracteristiques": "Coloration particulièrement intense (orange-rouge vif)", "statut_conservation": "population_captive_active", "note": "Forme la plus prisée des collectionneurs"},
+      {"localite": "Sungai Merimun", "statut_conservation": "population_captive_reduite"},
+      {"localite": "Muarapahu", "statut_conservation": "population_captive_reduite"}
+    ],
+    "risques_hybridation": "Hybridation possible avec Betta albimarginata (espèce jumelle du même complexe). Les hybrides sont pratiquement indiscernables. Acheter exclusivement chez des éleveurs spécialisés certifiant la pureté des lignées.",
+    "conseils_conservation_genetique": [
+      "Demander systématiquement la localité d'origine à l'acquisition",
+      "Ne jamais croiser des individus de localités différentes sans étiquetage clair",
+      "Ne pas croiser B. channoides avec B. albimarginata",
+      "Documenter chaque reproduction avec date, géniteurs et localité",
+      "Participer aux échanges entre éleveurs spécialisés"
+    ],
+    "especes_wild_type_vs_captive": "Pas de formes domestiquées. Préférer souches d'élevage européen F1/F2 certifiées aux wild-caught pour réduire la pression sur les populations sauvages."
+  },
+  "sante": {
+    "maladies_courantes": [
+      {"maladie": "Velours (Oodinium pillularis)", "symptomes": "Reflets dorés en poudre fine, grattages, nageoires repliées", "traitement": "Anti-oodinium adapté eau acide + obscurité totale", "prevention": "Quarantaine et traitement préventif systématique à l'acquisition", "gravite": "elevee"},
+      {"maladie": "Infections respiratoires", "symptomes": "Respiration difficile, rester en surface, perte d'appétit", "traitement": "Antibiotique si infection bactérienne. Corriger l'espace surface/couvercle.", "prevention": "Couvercle hermétique, air à même température que l'eau", "gravite": "elevee"},
+      {"maladie": "Acidose", "symptomes": "Comportement anormal, perte d'équilibre, nage sur le côté", "traitement": "Remontée très progressive du pH (0.1 unité/heure max)", "prevention": "pH-mètre obligatoire — contrôle hebdomadaire minimum. Ne jamais laisser pH < 4.0", "gravite": "mortelle"},
+      {"maladie": "Ich / Ichtyophthirius multifiliis", "symptomes": "Points blancs de 1mm, grattages", "traitement": "Anti-ich doux adapté à l'eau très acide", "prevention": "Quarantaine et stabilité des paramètres", "gravite": "moderee"},
+      {"maladie": "Obésité / stéatose hépatique", "symptomes": "Ventre très gonflé, perte de mobilité, coloration terne", "traitement": "Jeûne 5-7 jours puis régime basé sur daphnies uniquement", "prevention": "Ne pas suralimenter. Jeûner 1-2 jours/semaine. Limiter les artémias.", "gravite": "moderee"},
+      {"maladie": "Parasites internes", "symptomes": "Amaigrissement malgré alimentation correcte, fientes blanches", "traitement": "Antiparasitaire interne (métronidazole ou flubendazole)", "prevention": "Quarantaine longue. Nourriture vivante de sources contrôlées.", "gravite": "moderee"},
+      {"maladie": "Mâle couvant maigre", "symptomes": "Amaigrissement visible pendant l'incubation", "traitement": "Aucun — comportement normal", "prevention": "Conditionner généreusement le mâle avant l'accouplement", "gravite": "faible"}
+    ],
+    "prevention_generale": [
+      "Quarantaine minimum 4 semaines pour tout nouveau spécimen",
+      "Traitement préventif anti-oodinium systématique sur tout Betta sauvage",
+      "pH-mètre obligatoire — contrôle hebdomadaire",
+      "Conductimètre vivement conseillé",
+      "Couvercle hermétique en permanence",
+      "Ne jamais perturber le mâle en incubation"
+    ],
+    "produits_interdits": [
+      "Sel (espèce d'eau douce acide — ne tolère pas la salinité)",
+      "Malachite vert en eau très acide — toxicité accrue"
+    ],
+    "resume": {
+      "points_positifs": [
+        "Tête rouge et dorsale bordée de blanc — livrée spectaculaire et distinctive",
+        "Incubation buccale paternelle fascinante à observer",
+        "Alevins directement formés et autonomes à la libération",
+        "Longévité remarquable : 5 à 7 ans",
+        "Maintenable en groupe harémiste avec décor adapté",
+        "Bac de taille modeste suffisant (40 L idéal)"
+      ],
+      "points_attention": [
+        "Espèce protégée — vérifier impérativement l'origine des spécimens",
+        "Eau de tourbe obligatoire — pH 4.5-6.0 non négociable",
+        "pH-mètre et conductimètre indispensables",
+        "Nourriture vivante quasi obligatoire",
+        "Ne jamais perturber le mâle en incubation buccale",
+        "Couvercle hermétique obligatoire",
+        "Maintenir les lignées locales strictement séparées",
+        "En Martinique : osmoseur indispensable"
+      ]
+    }
+  }
+}
+]; // end FICHES
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let state = {
+  search: '',
+  diff: '',
+  famille: '',
+  repro: '',
+  sort: 'name',
+  currentId: null
+};
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+const DIFF_LABELS = {
+  debutant: 'Débutant', intermediaire: 'Intermédiaire',
+  avance: 'Avancé', expert: 'Expert'
+};
+const REPRO_LABELS = {
+  incubateur_buccal_paternel: 'Incubateur buccal paternel',
+  incubateur_buccal_maternel: 'Incubateur buccal maternel',
+  nid_de_bulles: 'Nid de bulles',
+  pondeur_substrat_ouvert: 'Pondeur substrat ouvert',
+  pondeur_substrat_cache: 'Pondeur substrat caché',
+  pondeur_cavicole: 'Pondeur cavicole',
+  vivipare: 'Vivipare', ovovivipare: 'Ovovivipare'
+};
+const TYPE_EAU = {
+  ruisseau_foret: 'Ruisseau forêt', marais_tourbe: 'Marais tourbe',
+  riziere: 'Rizière', marecage_cotier: 'Marécage côtier',
+  eau_stagnante: 'Eau stagnante', eau_courante: 'Eau courante'
+};
+
+function getEmojiForFamille(f) {
+  const map = { Osphronemidae:'🐡', Cichlidae:'🐟', Characidae:'🐠',
+    Callichthyidae:'🐡', Loricariidae:'🐟' };
+  return map[f] || '🐟';
+}
+
+function formatParam(obj, unit='') {
+  if (!obj) return '—';
+  if (obj.min !== undefined && obj.max !== undefined)
+    return `${obj.min} – ${obj.max}${unit ? ' ' + unit : ''}`;
+  if (obj.max !== undefined) return `< ${obj.max}${unit ? ' ' + unit : ''}`;
+  return '—';
+}
+
+function searchMatch(f, q) {
+  if (!q) return true;
+  const s = q.toLowerCase();
+  const t = [
+    f.identite.nom_scientifique_valide,
+    ...(f.identite.noms_communs?.fr || []),
+    ...(f.identite.noms_communs?.en || []),
+    f.identite.famille,
+    f.identite.genre,
+    ...(f.identite.synonymes?.map(s => s.nom) || [])
+  ].join(' ').toLowerCase();
+  return t.includes(s);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function init() {
+  // populate famille filter
+  const familles = [...new Set(FICHES.map(f => f.identite.famille))].sort();
+  const sel = document.getElementById('filterFamille');
+  familles.forEach(f => {
+    const o = document.createElement('option');
+    o.value = f; o.textContent = f;
+    sel.appendChild(o);
+  });
+
+  // events
+  document.getElementById('globalSearch').addEventListener('input', e => {
+    state.search = e.target.value; render();
+  });
+  document.getElementById('filterFamille').addEventListener('change', e => {
+    state.famille = e.target.value; render();
+  });
+  document.getElementById('filterRepro').addEventListener('change', e => {
+    state.repro = e.target.value; render();
+  });
+  document.getElementById('sortBy').addEventListener('change', e => {
+    state.sort = e.target.value; render();
+  });
+
+  document.querySelectorAll('#chips-diff .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#chips-diff .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.diff = chip.dataset.diff;
+      render();
+    });
+  });
+
+  document.getElementById('backBtn').addEventListener('click', showList);
+
+  // stats
+  document.getElementById('headerCount').textContent = FICHES.length + ' espèce' + (FICHES.length > 1 ? 's' : '');
+  document.getElementById('heroCount').textContent = FICHES.length;
+
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTER + SORT
+// ═══════════════════════════════════════════════════════════
+function filtered() {
+  let list = FICHES.filter(f => {
+    if (!searchMatch(f, state.search)) return false;
+    if (state.diff && f.identite.niveau_difficulte !== state.diff) return false;
+    if (state.famille && f.identite.famille !== state.famille) return false;
+    if (state.repro && f.reproduction?.mode_reproducteur !== state.repro) return false;
+    return true;
+  });
+  list.sort((a, b) => {
+    if (state.sort === 'diff') {
+      const ord = {debutant:0,intermediaire:1,avance:2,expert:3};
+      return (ord[a.identite.niveau_difficulte]||0) - (ord[b.identite.niveau_difficulte]||0);
+    }
+    if (state.sort === 'taille') return (a.identite.taille_adulte?.male_max_cm||0) - (b.identite.taille_adulte?.male_max_cm||0);
+    if (state.sort === 'volume') return (a.aquarium?.volume_minimum_litres||0) - (b.aquarium?.volume_minimum_litres||0);
+    return a.identite.noms_communs?.fr?.[0]?.localeCompare(b.identite.noms_communs?.fr?.[0] || '') || 0;
+  });
+  return list;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER GRID
+// ═══════════════════════════════════════════════════════════
+function render() {
+  const list = filtered();
+  const grid = document.getElementById('fishGrid');
+  const count = document.getElementById('resultsCount');
+
+  count.textContent = list.length + ' espèce' + (list.length > 1 ? 's' : '') + ' affichée' + (list.length > 1 ? 's' : '');
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <span class="empty-icon">🔍</span>
+      <h3>Aucune espèce trouvée</h3>
+      <p>Essayez d'autres mots-clés ou réinitialisez les filtres.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(f => {
+    const nom = f.identite.noms_communs?.fr?.[0] || f.identite.nom_scientifique_valide;
+    const diff = f.identite.niveau_difficulte;
+    const emoji = getEmojiForFamille(f.identite.famille);
+    const vol = f.aquarium?.volume_minimum_litres;
+    const temp = f.parametres_eau?.maintenance?.temperature_c;
+    return `<div class="fish-card" data-id="${f.id}">
+      <span class="card-emoji">${emoji}</span>
+      <div class="card-name">${nom}</div>
+      <div class="card-latin">${f.identite.nom_scientifique_valide}</div>
+      <div class="card-tags">
+        <span class="tag tag-diff-${diff}">${DIFF_LABELS[diff] || diff}</span>
+        ${f.identite.famille ? `<span class="tag tag-eau">${f.identite.famille}</span>` : ''}
+        ${vol ? `<span class="tag tag-vol">${vol} L min</span>` : ''}
+      </div>
+      <div class="card-footer">
+        <span>${temp ? temp.min + '–' + temp.max + ' °C' : ''}</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.fish-card').forEach(card => {
+    card.addEventListener('click', () => showDetail(parseInt(card.dataset.id)));
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SHOW DETAIL
+// ═══════════════════════════════════════════════════════════
+function showList() {
+  state.currentId = null;
+  document.getElementById('detailView').classList.remove('open');
+  document.getElementById('fishGrid').style.display = '';
+  document.getElementById('heroBanner').style.display = '';
+  document.getElementById('sidebar').style.display = '';
+  document.getElementById('sectionTitle').textContent = 'Espèces';
+  document.getElementById('sectionSub').textContent = '';
+  window.scrollTo(0, 0);
+}
+
+function showDetail(id) {
+  const f = FICHES.find(x => x.id === id);
+  if (!f) return;
+  state.currentId = id;
+  document.getElementById('fishGrid').style.display = 'none';
+  document.getElementById('heroBanner').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'none';
+
+  const nom = f.identite.noms_communs?.fr?.[0] || f.identite.nom_scientifique_valide;
+  document.getElementById('sectionTitle').textContent = nom;
+  document.getElementById('sectionSub').textContent = f.identite.nom_scientifique_valide;
+
+  const diff = f.identite.niveau_difficulte;
+  const emoji = getEmojiForFamille(f.identite.famille);
+  const legal = f.identite.statut_legal;
+
+  const card = document.getElementById('detailCard');
+  card.innerHTML = `
+    <!-- HERO -->
+    <div class="detail-hero">
+      <div class="detail-hero-inner">
+        <div class="detail-emoji-big">${emoji}</div>
+        <div class="detail-hero-text">
+          <div class="detail-name">${nom}</div>
+          <div class="detail-latin">${f.identite.nom_scientifique_valide} ${f.identite.auteur_description || ''}, ${f.identite.annee_description || ''}</div>
+          <div class="detail-badges">
+            <span class="badge badge-diff badge-${diff}">${DIFF_LABELS[diff]}</span>
+            <span class="badge badge-famille">${f.identite.famille}</span>
+            ${f.identite.complexe_groupe ? `<span class="badge badge-famille">${f.identite.complexe_groupe}</span>` : ''}
+            ${legal?.cites && legal.cites !== 'Non listé' ? `<span class="badge badge-legal-warn">CITES ${legal.cites}</span>` : `<span class="badge badge-legal-ok">Non listé CITES</span>`}
+            ${f.meta?.note_martinique ? `<span class="badge badge-eau">🇲🇶 Notes Martinique</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${legal?.avertissement ? `<div style="padding:14px 24px;background:#2A1414;border-bottom:1px solid #5A2020;">
+      <span style="font-size:13px;color:#F08080;">${legal.avertissement}</span>
+    </div>` : ''}
+
+    <!-- TABS -->
+    <div class="detail-tabs">
+      <div class="dtab active" data-pane="params"><span class="dtab-icon">💧</span> Paramètres</div>
+      <div class="dtab" data-pane="identite"><span class="dtab-icon">🔎</span> Identité</div>
+      <div class="dtab" data-pane="compat"><span class="dtab-icon">🤝</span> Cohabitation</div>
+      <div class="dtab" data-pane="alim"><span class="dtab-icon">🍽️</span> Alimentation</div>
+      <div class="dtab" data-pane="repro"><span class="dtab-icon">🥚</span> Reproduction</div>
+      <div class="dtab" data-pane="genetique"><span class="dtab-icon">🧬</span> Génétique</div>
+      <div class="dtab" data-pane="sante"><span class="dtab-icon">⚕️</span> Santé</div>
+    </div>
+
+    <div class="detail-body">
+
+      <!-- PANE PARAMS -->
+      <div class="dpane active" data-pane="params">
+        ${buildParamsPane(f)}
+      </div>
+
+      <!-- PANE IDENTITE -->
+      <div class="dpane" data-pane="identite">
+        ${buildIdentitePane(f)}
+      </div>
+
+      <!-- PANE COMPAT -->
+      <div class="dpane" data-pane="compat">
+        ${buildCompatPane(f)}
+      </div>
+
+      <!-- PANE ALIM -->
+      <div class="dpane" data-pane="alim">
+        ${buildAlimPane(f)}
+      </div>
+
+      <!-- PANE REPRO -->
+      <div class="dpane" data-pane="repro">
+        ${buildReproPane(f)}
+      </div>
+
+      <!-- PANE GENETIQUE -->
+      <div class="dpane" data-pane="genetique">
+        ${buildGenetiquePane(f)}
+      </div>
+
+      <!-- PANE SANTE -->
+      <div class="dpane" data-pane="sante">
+        ${buildSantePane(f)}
+      </div>
+
+    </div>
+  `;
+
+  // Tab switching
+  card.querySelectorAll('.dtab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      card.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+      card.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      card.querySelector(`.dpane[data-pane="${tab.dataset.pane}"]`).classList.add('active');
+    });
+  });
+
+  // Maladie accordéons
+  card.querySelectorAll('.maladie-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const body = h.nextElementSibling;
+      body.classList.toggle('open');
+      h.querySelector('.maladie-toggle').textContent = body.classList.contains('open') ? '▲' : '▼';
+    });
+  });
+
+  document.getElementById('detailView').classList.add('open');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PANE BUILDERS
+// ═══════════════════════════════════════════════════════════
+function buildParamsPane(f) {
+  const p = f.parametres_eau?.maintenance;
+  const aq = f.aquarium;
+  if (!p) return '<p class="dtext">Paramètres non renseignés.</p>';
+
+  const params = [
+    ['Température', formatParam(p.temperature_c, '°C'), p.temperature_c?.ideal ? `Idéal : ${p.temperature_c.ideal} °C` : ''],
+    ['pH', formatParam(p.ph), p.ph?.ideal_min ? `Idéal : ${p.ph.ideal_min}–${p.ph.ideal_max}` : ''],
+    ['GH', formatParam(p.gh_dgh, '°GH'), ''],
+    ['KH', p.kh_dkh ? formatParam(p.kh_dkh, '°KH') : '—', ''],
+    ['Conductivité', p.conductivite_us_cm ? formatParam(p.conductivite_us_cm, 'µS/cm') : '—', ''],
+    ['Nitrites', p.nitrites_mg_l?.max === 0 ? '0 mg/L' : formatParam(p.nitrites_mg_l, 'mg/L'), ''],
+    ['Nitrates', p.nitrates_mg_l ? `< ${p.nitrates_mg_l.max} mg/L` : '—', ''],
+    ['Volume min', aq?.volume_minimum_litres ? aq.volume_minimum_litres + ' L' : '—', aq?.volume_ideal_litres ? `Idéal : ${aq.volume_ideal_litres} L` : ''],
+    ['Volume groupe', aq?.volume_groupe_litres ? aq.volume_groupe_litres + ' L' : '—', ''],
+    ['Taille adulte', f.identite.taille_adulte ? `♂ ${f.identite.taille_adulte.male_max_cm} cm` : '—', f.identite.taille_adulte?.femelle_max_cm ? `♀ ${f.identite.taille_adulte.femelle_max_cm} cm` : ''],
+    ['Longévité', f.identite.duree_vie_ans ? `${f.identite.duree_vie_ans.min}–${f.identite.duree_vie_ans.max} ans` : '—', ''],
+    ['Courant', aq?.courant ? aq.courant.replace('_',' ') : '—', ''],
+  ];
+
+  let html = `<div class="param-grid">`;
+  params.forEach(([label, val, sub]) => {
+    html += `<div class="param-box">
+      <div class="param-box-label">${label}</div>
+      <div class="param-box-value">${val}</div>
+      ${sub ? `<div class="param-box-ideal">${sub}</div>` : ''}
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (f.parametres_eau?.preparation_eau) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🧪</span> Préparation de l'eau</div>
+      <div class="dtext">${f.parametres_eau.preparation_eau}</div>
+    </div>`;
+  }
+
+  if (f.parametres_eau?.avertissements_chimie?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚠️</span> Avertissements chimie</div>`;
+    f.parametres_eau.avertissements_chimie.forEach(a => {
+      html += `<div class="warn-box warn-box-amber" style="margin-bottom:8px;">${a}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (f.parametres_eau?.note_martinique) {
+    html += `<div class="warn-box warn-box-teal">
+      <strong>🇲🇶 Note Martinique</strong> — ${f.parametres_eau.note_martinique}
+    </div>`;
+  }
+
+  if (f.parametres_eau?.reproduction) {
+    const r = f.parametres_eau.reproduction;
+    html += `<div class="dsection" style="margin-top:20px;">
+      <div class="dsection-title"><span class="dsection-icon">🥚</span> Paramètres pour la reproduction</div>`;
+    if (r.temperature_c) html += `<div class="dtext" style="margin-bottom:6px;"><strong>Température :</strong> ${formatParam(r.temperature_c, '°C')}${r.temperature_c.note ? ' — ' + r.temperature_c.note : ''}</div>`;
+    if (r.ph) html += `<div class="dtext" style="margin-bottom:6px;"><strong>pH :</strong> ${formatParam(r.ph)}${r.ph.note ? ' — ' + r.ph.note : ''}</div>`;
+    if (r.note_generale) html += `<div class="dtext" style="margin-top:8px;">${r.note_generale}</div>`;
+    html += `</div>`;
+  }
+
+  if (aq?.substrat || aq?.vegetation || aq?.decor_cachettes || aq?.filtration || aq?.changements_eau) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🪴</span> Aménagement de l'aquarium</div>`;
+    const items = [
+      ['Substrat', aq.substrat], ['Végétation', aq.vegetation],
+      ['Décor & cachettes', aq.decor_cachettes], ['Filtration', aq.filtration],
+      ['Changements d\'eau', aq.changements_eau]
+    ];
+    items.forEach(([label, val]) => {
+      if (val) html += `<div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:var(--ink-l);text-transform:uppercase;letter-spacing:.06em;">${label}</span><div class="dtext" style="margin-top:3px;">${val}</div></div>`;
+    });
+    html += `</div>`;
+    if (aq.note_martinique) html += `<div class="warn-box warn-box-teal">🇲🇶 ${aq.note_martinique}</div>`;
+  }
+
+  return html;
+}
+
+function buildIdentitePane(f) {
+  const id = f.identite;
+  let html = `<div class="dsection">
+    <div class="dsection-title"><span class="dsection-icon">🔎</span> Classification</div>`;
+  const rows = [
+    ['Famille', id.famille], ['Ordre', id.ordre], ['Genre', id.genre],
+    ['Complexe / Groupe', id.complexe_groupe],
+    ['Auteur & Année', id.auteur_description ? `${id.auteur_description}, ${id.annee_description}` : id.annee_description],
+    ['Étymologie', id.etymologie],
+    ['Niveau difficulté', DIFF_LABELS[id.niveau_difficulte]],
+    ['Note difficulté', id.note_difficulte],
+  ];
+  rows.forEach(([label, val]) => {
+    if (val) html += `<div style="display:flex;gap:16px;padding:7px 0;border-bottom:1px solid var(--border);">
+      <span style="min-width:160px;font-size:12px;font-weight:600;color:var(--ink-l);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">${label}</span>
+      <span class="dtext" style="flex:1;">${val}</span>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (id.statut_legal) {
+    const l = id.statut_legal;
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚖️</span> Statut légal & protection</div>`;
+    [['CITES', l.cites], ['Statut UICN', l.statut_iucn], ['Protection nationale', l.protection_nationale], ['Réglementation Martinique', l.reglementation_martinique]].forEach(([label, val]) => {
+      if (val) html += `<div style="display:flex;gap:16px;padding:7px 0;border-bottom:1px solid var(--border);">
+        <span style="min-width:160px;font-size:12px;font-weight:600;color:var(--ink-l);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">${label}</span>
+        <span class="dtext">${val}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (id.origine) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">📍</span> Origine & localités</div>
+      <div class="dtext" style="margin-bottom:12px;">
+        <strong>Pays :</strong> ${id.origine.pays?.join(', ') || '—'}<br>
+        <strong>Régions :</strong> ${id.origine.regions?.join(', ') || '—'}
+        ${id.origine.localite_type ? `<br><strong>Localité type :</strong> ${id.origine.localite_type}` : ''}
+      </div>`;
+    if (id.origine.localites_connues?.length) {
+      html += `<div class="localite-list">`;
+      id.origine.localites_connues.forEach(loc => {
+        html += `<div class="localite-item">
+          <span class="localite-pin">📍</span>
+          <div>
+            <div class="localite-nom">${loc.nom}</div>
+            ${loc.latitude !== undefined ? `<div class="localite-coords">${loc.latitude}°, ${loc.longitude}°</div>` : ''}
+            ${loc.note ? `<div class="localite-note">${loc.note}</div>` : ''}
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  if (id.habitat_naturel?.description) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🌿</span> Habitat naturel</div>
+      <div class="dtext">${id.habitat_naturel.description}</div>
+    </div>`;
+  }
+
+  if (f.description_physique) {
+    const dp = f.description_physique;
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🎨</span> Description physique</div>
+      ${dp.description_generale ? `<div class="dtext" style="margin-bottom:12px;">${dp.description_generale}</div>` : ''}
+      ${dp.coloration_male ? `<div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:var(--ink-l);text-transform:uppercase;letter-spacing:.06em;">Mâle</span><div class="dtext">${dp.coloration_male}</div></div>` : ''}
+      ${dp.coloration_femelle ? `<div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:var(--ink-l);text-transform:uppercase;letter-spacing:.06em;">Femelle</span><div class="dtext">${dp.coloration_femelle}</div></div>` : ''}
+      ${dp.dimorphisme_sexuel ? `
+        <div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:var(--ink-l);text-transform:uppercase;letter-spacing:.06em;">Dimorphisme sexuel</span>
+        <div class="dtext">♂ ${dp.dimorphisme_sexuel.male || ''}<br>♀ ${dp.dimorphisme_sexuel.femelle || ''}</div>
+        ${dp.dimorphisme_sexuel.criteres_fiables?.length ? `<div style="margin-top:6px;font-size:12px;color:var(--teal);">Critères fiables : ${dp.dimorphisme_sexuel.criteres_fiables.join(' · ')}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+  }
+
+  if (id.synonymes?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">📚</span> Synonymes & anciens noms</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">`;
+    id.synonymes.forEach(s => {
+      html += `<div style="padding:8px 12px;background:var(--sand);border-radius:var(--r-sm);border:1px solid var(--border);">
+        <span style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--navy);">${s.nom}</span>
+        <span style="font-size:11px;color:var(--ink-l);margin-left:10px;">${s.type_synonyme?.replace('_',' ')}</span>
+        ${s.note ? `<div style="font-size:12px;color:var(--ink-l);margin-top:3px;">${s.note}</div>` : ''}
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  return html;
+}
+
+function buildCompatPane(f) {
+  const c = f.comportement;
+  if (!c) return '<p class="dtext">Données de cohabitation non renseignées.</p>';
+  let html = `<div class="dsection">
+    <div class="dsection-title"><span class="dsection-icon">🐟</span> Comportement général</div>
+    <div class="dtext">${c.comportement_general || '—'}</div>
+    ${c.configuration_recommandee ? `<div style="margin-top:10px;" class="warn-box warn-box-teal"><strong>Configuration recommandée :</strong> ${c.configuration_recommandee}</div>` : ''}
+  </div>`;
+
+  if (c.comportements_notables?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">💡</span> Comportements notables</div>`;
+    c.comportements_notables.forEach(b => {
+      html += `<div style="padding:8px 12px 8px 16px;border-left:3px solid var(--teal);margin-bottom:8px;background:var(--teal-l);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:13px;color:var(--ink-m);">${b}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="dsection">
+    <div class="dsection-title"><span class="dsection-icon">🤝</span> Associations</div>
+    <div class="compat-cols">
+      <div class="compat-col compat-col-ok">
+        <div class="compat-col-title">✓ Associations recommandées</div>`;
+  (c.cohabitation_ok || []).forEach(item => {
+    html += `<div class="compat-item compat-item-ok">
+      <strong>${item.espece_ou_groupe}</strong>
+      ${item.condition ? `<br><span style="font-size:11px;opacity:.8;">${item.condition}</span>` : ''}
+      ${item.note ? `<br><span style="font-size:11px;opacity:.8;">${item.note}</span>` : ''}
+    </div>`;
+  });
+  html += `</div><div class="compat-col compat-col-ko">
+    <div class="compat-col-title">✗ Associations déconseillées</div>`;
+  (c.cohabitation_ko || []).forEach(item => {
+    html += `<div class="compat-item compat-item-ko">
+      <strong>${item.espece_ou_groupe}</strong>
+      ${item.raison ? `<br><span style="font-size:11px;opacity:.8;">${item.raison}</span>` : ''}
+    </div>`;
+  });
+  html += `</div></div></div>`;
+  return html;
+}
+
+function buildAlimPane(f) {
+  const a = f.alimentation;
+  if (!a) return '<p class="dtext">Données alimentaires non renseignées.</p>';
+  let html = `<div class="dsection">
+    <div class="dsection-title"><span class="dsection-icon">🍽️</span> Régime alimentaire</div>
+    <div class="dtext">${a.description_regime || a.regime || '—'}</div>
+    ${a.frequence ? `<div class="warn-box warn-box-teal" style="margin-top:10px;"><strong>Fréquence :</strong> ${a.frequence}</div>` : ''}
+  </div>`;
+
+  if (a.aliments?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⭐</span> Aliments</div>
+      <div class="aliment-list">`;
+    a.aliments.forEach(al => {
+      html += `<div class="aliment-item">
+        <span class="aliment-prio prio-${al.priorite}">${al.priorite}</span>
+        <div class="aliment-info">
+          <div class="aliment-nom">${al.nom}</div>
+          ${al.note ? `<div class="aliment-note">${al.note}</div>` : ''}
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  if (a.avertissements?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚠️</span> Avertissements</div>`;
+    a.avertissements.forEach(w => { html += `<div class="warn-box warn-box-amber" style="margin-bottom:8px;">${w}</div>`; });
+    html += `</div>`;
+  }
+
+  if (a.note_male_couvaison) {
+    html += `<div class="warn-box warn-box-teal"><strong>♂ Mâle en couvaison :</strong> ${a.note_male_couvaison}</div>`;
+  }
+  return html;
+}
+
+function buildReproPane(f) {
+  const r = f.reproduction;
+  if (!r) return '<p class="dtext">Données de reproduction non renseignées.</p>';
+  let html = `<div class="dsection">
+    <div class="dsection-title"><span class="dsection-icon">🥚</span> Mode reproducteur</div>
+    <div style="display:inline-block;padding:6px 16px;background:var(--navy);color:var(--white);border-radius:20px;font-size:13px;font-weight:600;margin-bottom:12px;">
+      ${REPRO_LABELS[r.mode_reproducteur] || r.mode_reproducteur}
+    </div>
+    <div class="dtext">${r.description_generale || '—'}</div>
+  </div>`;
+
+  if (r.declenchement) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚡</span> Déclenchement</div>
+      <div class="dtext">${r.declenchement.description || ''}</div>
+      ${r.declenchement.parametres_eau_specifiques ? `<div class="warn-box warn-box-teal" style="margin-top:8px;"><strong>Paramètres :</strong> ${r.declenchement.parametres_eau_specifiques}</div>` : ''}
+      ${r.declenchement.autres_facteurs?.length ? `<div style="margin-top:10px;">${r.declenchement.autres_facteurs.map(f => `<div style="padding:5px 0 5px 14px;border-left:2px solid var(--teal);margin-bottom:5px;font-size:13px;color:var(--ink-m);">${f}</div>`).join('')}</div>` : ''}
+    </div>`;
+  }
+
+  if (r.deroulement) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">📋</span> Déroulement</div>
+      <div class="dtext">${r.deroulement}</div>
+    </div>`;
+  }
+
+  if (r.tableau_etapes?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">📊</span> Étapes</div>
+      <div style="overflow-x:auto;">
+      <table class="repro-table">
+        <thead><tr><th>Étape</th><th>Valeur</th><th>Note</th></tr></thead>
+        <tbody>`;
+    r.tableau_etapes.forEach(e => {
+      html += `<tr>
+        <td class="col-etape">${e.etape}</td>
+        <td class="col-valeur">${e.valeur}</td>
+        <td class="col-note">${e.note || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  }
+
+  if (r.elevage_alevins) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🐟</span> Élevage des alevins</div>
+      <div class="dtext">${r.elevage_alevins}</div>
+    </div>`;
+  }
+
+  if (r.points_critiques?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚠️</span> Points critiques</div>`;
+    r.points_critiques.forEach(p => { html += `<div class="warn-box warn-box-amber" style="margin-bottom:8px;">${p}</div>`; });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+function buildGenetiquePane(f) {
+  const g = f.genetique;
+  if (!g) return '<p class="dtext">Données génétiques non renseignées.</p>';
+  let html = `<div class="dsection">
+    <div class="dsection-title"><span class="dsection-icon">🧬</span> Génétique & sélection</div>
+    <div class="dtext">${g.description_generale || '—'}</div>
+  </div>`;
+
+  if (g.lignees_localites?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">📍</span> Lignées et localités</div>
+      <div class="localite-list">`;
+    g.lignees_localites.forEach(l => {
+      const stColors = {population_captive_active:'var(--green-l)',population_captive_reduite:'var(--amber-l)',population_sauvage_stable:'var(--teal-l)',population_menacee:'var(--red-l)'};
+      html += `<div class="localite-item" style="background:${stColors[l.statut_conservation]||'var(--sand)'}">
+        <span class="localite-pin">🧬</span>
+        <div>
+          <div class="localite-nom">${l.localite}</div>
+          ${l.caracteristiques ? `<div class="localite-note">${l.caracteristiques}</div>` : ''}
+          ${l.note ? `<div class="localite-note" style="font-style:italic;">${l.note}</div>` : ''}
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:4px;color:var(--ink-l);">${l.statut_conservation?.replace(/_/g,' ') || ''}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  if (g.risques_hybridation) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚠️</span> Risques d'hybridation</div>
+      <div class="warn-box warn-box-amber">${g.risques_hybridation}</div>
+    </div>`;
+  }
+
+  if (g.conseils_conservation_genetique?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">✅</span> Conservation génétique</div>`;
+    g.conseils_conservation_genetique.forEach(c => {
+      html += `<div style="padding:6px 0 6px 16px;border-left:3px solid var(--green);margin-bottom:6px;font-size:13px;color:var(--ink-m);">${c}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (g.especes_wild_type_vs_captive) {
+    html += `<div class="warn-box warn-box-teal">${g.especes_wild_type_vs_captive}</div>`;
+  }
+
+  return html;
+}
+
+function buildSantePane(f) {
+  const s = f.sante;
+  if (!s) return '<p class="dtext">Données de santé non renseignées.</p>';
+  let html = '';
+
+  // Résumé en haut
+  if (s.resume) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">📋</span> Résumé de la fiche</div>
+      <div class="resume-cols">
+        <div class="resume-col resume-col-ok">
+          <div class="resume-col-title">✓ Points positifs</div>
+          ${s.resume.points_positifs?.map(p => `<div class="resume-item">${p}</div>`).join('') || ''}
+        </div>
+        <div class="resume-col resume-col-ko">
+          <div class="resume-col-title">⚠ Points d'attention</div>
+          ${s.resume.points_attention?.map(p => `<div class="resume-item">${p}</div>`).join('') || ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (s.prevention_generale?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🛡️</span> Prévention générale</div>
+      <div class="warn-box warn-box-teal">`;
+    s.prevention_generale.forEach(p => { html += `<div style="margin-bottom:5px;">• ${p}</div>`; });
+    html += `</div></div>`;
+  }
+
+  if (s.produits_interdits?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">🚫</span> Produits interdits</div>`;
+    s.produits_interdits.forEach(p => { html += `<div class="warn-box warn-box-red" style="margin-bottom:8px;">✗ ${p}</div>`; });
+    html += `</div>`;
+  }
+
+  if (s.maladies_courantes?.length) {
+    html += `<div class="dsection">
+      <div class="dsection-title"><span class="dsection-icon">⚕️</span> Maladies courantes — cliquez pour développer</div>`;
+    s.maladies_courantes.forEach(m => {
+      html += `<div class="maladie-card">
+        <div class="maladie-header">
+          <span class="maladie-nom">${m.maladie}</span>
+          <span class="maladie-gravite grav-${m.gravite}">${m.gravite}</span>
+          <span class="maladie-toggle" style="font-size:11px;color:var(--ink-l);margin-left:8px;">▼</span>
+        </div>
+        <div class="maladie-body">
+          <div class="maladie-row"><div class="maladie-row-label">Symptômes</div><div>${m.symptomes}</div></div>
+          <div class="maladie-row"><div class="maladie-row-label">Traitement</div><div>${m.traitement}</div></div>
+          ${m.prevention ? `<div class="maladie-row"><div class="maladie-row-label">Prévention</div><div>${m.prevention}</div></div>` : ''}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
